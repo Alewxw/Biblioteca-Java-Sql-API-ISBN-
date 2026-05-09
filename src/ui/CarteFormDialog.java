@@ -1,9 +1,6 @@
 package ui;
 
-import business.AutoriService;
-import business.CarteAutorService;
-import business.CartiService;
-import business.EdituriService;
+import business.*;
 import data.Autor;
 import data.Carte;
 import data.Editura;
@@ -12,6 +9,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class CarteFormDialog extends JDialog {
 
@@ -27,6 +25,9 @@ public class CarteFormDialog extends JDialog {
         JTextField an_publicare = new JTextField();
         JComboBox<Editura> editura = new JComboBox<>();
         JList<Autor> autor = new  JList<Autor>();
+
+        JTextField isbn = new JTextField();
+        JButton cauta = new JButton("Cauta");
 
         EdituriService edits = new EdituriService();
         List<Editura> edituri = edits.getAll();
@@ -47,7 +48,7 @@ public class CarteFormDialog extends JDialog {
         autor.setModel(model);
         autor.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 
-        JPanel formPanel = new JPanel(new GridLayout(4, 2, 5, 5));
+        JPanel formPanel = new JPanel(new GridLayout(6, 2, 5, 5));
         formPanel.add(new JLabel("Titlu:"));
         formPanel.add(titlu);
         formPanel.add(new JLabel("An publicare:"));
@@ -56,6 +57,12 @@ public class CarteFormDialog extends JDialog {
         formPanel.add(editura);
         formPanel.add(new JLabel("Autori:"));
         formPanel.add(new JScrollPane(autor));
+
+        formPanel.add(new JLabel("ISBN:"));
+        formPanel.add(isbn);
+
+        formPanel.add(new JLabel(""));
+        formPanel.add(cauta);
 
         add(formPanel, BorderLayout.CENTER);
 
@@ -84,6 +91,21 @@ public class CarteFormDialog extends JDialog {
                 carteAutorService.add(last.getId(), a.getId());
             }
         });
+
+        cauta.addActionListener( e-> {
+            IsbnService isbnService = new IsbnService();
+            Map<String, Object> info = isbnService.getCarte(isbn.getText());
+
+            if (info == null || info.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "ISBN negasit!", "Eroare", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            titlu.setText((String) info.get("title"));
+            an_publicare.setText(info.get("publish_date").toString());
+
+        });
+
         setVisible(true);
     }
 
